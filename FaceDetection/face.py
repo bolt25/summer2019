@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 face_cascade=cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
 eye_cascade=cv2.CascadeClassifier('haarcascade_eye.xml')
 def detect(gray,frame):
@@ -10,14 +11,28 @@ def detect(gray,frame):
 		eye=eye_cascade.detectMultiScale(gray_eye,1.3,5)
 		for (ex,ey,ew,eh) in eye:
 			cv2.rectangle(color_eye,(ex,ey),(ex+ew,ey+eh),(255,0,0),2)
-	return frame
+	return cv2.flip(frame,1)
+
+
+
 cap=cv2.VideoCapture(0)
-while True:
-	ret,frame=cap.read()
-	gray=cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-	output=detect(gray,frame)
-	cv2.imshow('Face_Det',output)
-	if cv2.waitKey(1) & 0XFF==ord('q'):
-		break
+fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+out = cv2.VideoWriter('output.avi',fourcc, 24.0, (680,480),True)
+
+
+while (cap.isOpened()):
+	ret,frames=cap.read()
+	if ret==True:
+		grays=cv2.cvtColor(frames,cv2.COLOR_BGR2GRAY)
+		output=detect(grays,frames)
+		print(type(frames))
+		
+		cv2.imshow('Face_Det',output)
+		
+		if cv2.waitKey(1) & 0XFF==ord('q'):
+			break
+		else:
+			print(out.write(frames))
 cap.release()
+out.release()
 cv2.destroyAllWindows()
